@@ -42,9 +42,9 @@ public class Main implements ActionListener{
   public JTextField OS;
   public JTextField PC;
   public ControlUnit controlUnit;
-  public ALU alu;
-  public ProgramCounter pc;
-  public IOUnit ioUnit;
+//  public ALU alu;
+//  public ProgramCounter pc;
+//  public IOUnit ioUnit;
   public String instruction;
   public String operand;
   public String address;
@@ -54,9 +54,9 @@ public class Main implements ActionListener{
 		
 	    HashMap<Long, Long> memory = new HashMap<>();
 	    controlUnit = new ControlUnit(memory);
-	    alu = controlUnit.getAlu();
-	    pc =controlUnit.getPc();
-	    ioUnit = new IOUnit(memory);
+//	    alu = controlUnit.getAlu();
+//	    pc = controlUnit.getPc();
+//	    ioUnit = new IOUnit(memory);
 	   
 		JFrame frame = new JFrame();
 		JPanel mainPanel = new JPanel();
@@ -125,8 +125,6 @@ public class Main implements ActionListener{
 		bottomEastPanel.add(outputBox,BorderLayout.CENTER);
 		
 		frame.pack();
-		
-		
 	}
 
 	private JButton JButton(String string) {
@@ -137,6 +135,23 @@ public class Main implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == run) {
 			objectCodeInput = objectCode.getText();
+//			ProgramCounter pc = new ProgramCounter();
+//			binaryString = pc.getBinaryString(objectCodeInput);
+//			List<Command> commandList = pc.getCommand(binaryString);
+//			System.exit(0);
+			controlUnit.stop = 0; // reset program;
+			controlUnit.clearR();
+			controlUnit.setCode(objectCodeInput);
+			while(controlUnit.stop == 0) { // not stop
+				controlUnit.fetch();
+				controlUnit.decode();
+				controlUnit.execute();
+	            IS.setText("Instruction: " + controlUnit.current.getInstruction());
+	            OS.setText("Operand: " + controlUnit.current.getOperand());
+	            PC.setText("Program Counter: " + controlUnit.getPc());
+	            outputBox.setText(controlUnit.getIO().getOutput());
+			}
+/*
 //			JOptionPane.showMessageDialog(null, "Input " + objectCodeInput);
 			binaryString = pc.getBinaryString(objectCodeInput);
 			List<Command> commandList = pc.getCommand(binaryString);
@@ -156,10 +171,26 @@ public class Main implements ActionListener{
 //	            System.out.println("-------------------------------------------");
 	        }
 //	        System.exit(0);
+ * */
 		}
 	}
 	
-    public static void main(String[] args) {
+    private String getBinaryString(String inputs) {
+        StringBuilder binaryString = new StringBuilder();
+        for(int i=0;i<inputs.length();i+=2){ // 16 bit code align
+            String temp = inputs.substring(i,i+2);
+            String binaryPart = Long.toBinaryString(Long.parseLong(temp,16));
+            while(binaryPart.length()<8){
+                binaryPart = "0" + binaryPart;
+            }
+            binaryString.append(binaryPart);
+        }
+        System.out.println("The input hex transfer to binary: " + binaryString);
+        System.out.println("------------------------------------");
+        return binaryString.toString();
+	}
+
+	public static void main(String[] args) {
 //         Simply think of the hashmap as memory.
 //         The key value pair is regarded as the mapping of address and data.
     	new Main();
@@ -171,7 +202,8 @@ public class Main implements ActionListener{
          
 //       String inputs = "50004850006550006c50006c50006f00";
     	
-    	
+
+//       String inputs = "50004850006550006c50006c50006f00";
          
     }
 }

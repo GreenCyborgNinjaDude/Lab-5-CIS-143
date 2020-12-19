@@ -8,16 +8,26 @@
  */
 package command;
 
+import java.util.HashMap;
+
 /**
  * Process input string conversion to instruction information
+ * BR(0x04, 1, 3, BRANCH),
+   BRLE(0x06, 1, 3, BRANCH),
+   BRLT(0x08, 1, 3, BRANCH),
+   BREQ(0x0A, 1, 3, BRANCH),
+   BRNE(0x0C, 1, 3, BRANCH),
+   BRGE(0x0E, 1, 3, BRANCH),
  */
 public class Command {
-    private final String name;
-    private final int type;
-    private final String data;
-    private final String instruction;
-    private final String operand;
-    private String pc;
+    private String name;
+    private int type;
+    private String data;
+    private String instruction;
+    private String operand;
+    private HashMap<Integer, Integer> rules;
+    private HashMap<Integer, String> names;
+    private HashMap<Integer, Integer> types;
 
     /**
      * Parsing input string correctly processing instructions
@@ -37,6 +47,68 @@ public class Command {
                 && !specifiers.startsWith("0000")) {
             System.out.println("Instruction code is wrong, please check it...");
         }
+    }
+    
+    public Command() {
+		this.type = 0;
+		this.rules = new HashMap<>();
+	    this.names = new HashMap<>();
+	    this.types = new HashMap<>();
+	    //old command
+		this.addrule(0xc0, 3, "Load", 0);
+		this.addrule(0xe0, 3, "Store", 0);
+		this.addrule(0x70, 3, "Add", 0);
+		this.addrule(0x80, 3, "Sub", 0);
+		this.addrule(0x48, 3, "In", 0); // 48, 0
+		this.addrule(0x49, 3, "In", 1); // 49, 1
+		this.addrule(0x50, 3, "Out", 0); // 50, 0
+		this.addrule(0x51, 3, "Out", 1); // 51, 1
+		this.addrule(0x00, 1, "Stop", 0);
+		// add new command below:
+		this.addrule(0x04, 3, "BR", 0);
+		this.addrule(0x06, 3, "BRLE", 0);
+		this.addrule(0x08, 3, "BRLT", 0);
+		this.addrule(0x0A, 3, "BREQ", 0);
+		this.addrule(0x0C, 3, "BRNE", 0);
+		this.addrule(0x0E, 3, "BRGE", 0);
+		//Kiet's rule
+		this.addrule(0xA1, 3, "NEGR", 0);
+		this.addrule(0x20, 3, "ROLX", 0);
+		this.addrule(0x22, 3, "RORX", 0);
+		this.addrule(0x1C, 3, "ASLX", 0);
+		this.addrule(0x1E, 3, "ASRX", 0);
+    }
+    
+    private void addrule(Integer op, Integer len, String string, Integer type) {
+		// TODO Auto-generated method stub
+    	this.rules.put(op, len);
+    	this.names.put(op, string);
+    	this.types.put(op, type);
+	}
+
+	public int fetch(Integer op) {
+		int len = 0;
+		try {
+			len = this.rules.get(op);
+			this.name = this.names.get(op);
+			this.type = this.types.get(op);
+		}catch(Exception e) {
+            System.out.println("Instruction code is wrong, please check it...");
+		}
+    	return len;
+    }
+    
+    public void decode(Integer[] op) {
+    	// set data
+    	int size = op.length;
+    	this.data = "";
+    	for(int i=1; i<size; i++) {
+    		String str = Integer.toBinaryString(op[i]);
+    		while(str.length() < 8) {
+    			str = '0' + str;
+    		}
+        	this.data = this.data + str;
+    	}
     }
 
     /**
@@ -100,11 +172,4 @@ public class Command {
         return operand;
     }
 
-    public String getPc(){
-        return this.pc;
-    }
-
-    public void setPc(String pc){
-        this.pc = pc;
-    }
 }
