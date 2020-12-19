@@ -49,13 +49,13 @@ public class ProgramCounter {
 //            the PC is incremented by 3
             if(!"0000".equals(binaryString.substring(start,start+4))){
                 Command command = new Command(binaryString.substring(start,start+6*length));
-                command.setPc(address);
+//                command.setPc(address);
                 commandList.add(command);
                 start+=6*length;
                 pc+=3;
             } else {
                 Command command = new Command(binaryString.substring(start,start+2*length));
-                command.setPc(address);
+//                command.setPc(address);
                 commandList.add(command);
                 start+=2*length;
                 pc+=1;
